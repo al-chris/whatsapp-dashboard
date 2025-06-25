@@ -6,3 +6,7 @@
 *.sqlite
 *.pid
 .venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
