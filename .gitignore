@@ -1,0 +1,7 @@
+*.db
+*.env
+.env*
+*.log
+*.sqlite3
+*.sqlite
+*.pid

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Chat Analysis Dashboard</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <h1 class="logo">WhatsApp Chat Analyzer</h1>
+                <nav class="nav">
+                    <button id="homeBtn" class="nav-btn active">Home</button>
+                    <button id="dashboardBtn" class="nav-btn">Dashboard</button>
+                    <button id="uploadsBtn" class="nav-btn">My Uploads</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Upload Section -->
+            <section id="uploadSection" class="section active">
+                <div class="container">
+                    <div class="upload-area">
+                        <h2>Upload Your WhatsApp Chat</h2>
+                        <p>Export your WhatsApp chat and upload it here for analysis</p>
+                        
+                        <div class="file-upload" id="fileUpload">
+                            <div class="upload-zone" id="uploadZone">
+                                <div class="upload-icon">📁</div>
+                                <p>Drag & drop your chat file here or click to browse</p>
+                                <p class="file-types">Supports .txt and .zip files</p>
+                                <input type="file" id="fileInput" accept=".txt,.zip" hidden>
+                            </div>
+                        </div>
+
+                        <div class="upload-progress" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p id="progressText">Uploading...</p>
+                        </div>
+
+                        <div class="upload-result" id="uploadResult" style="display: none;">
+                            <div class="result-card">
+                                <h3>Upload Successful!</h3>
+                                <div class="stats" id="uploadStats"></div>
+                                <button id="viewDashboardBtn" class="btn-primary">View Analysis</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How to Export Guide -->
+                    <div class="guide-section">
+                        <h3>How to Export WhatsApp Chat</h3>
+                        <div class="steps">
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <strong>Open WhatsApp</strong>
+                                    <p>Go to the chat you want to analyze</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <strong>Export Chat</strong>
+                                    <p>Tap on chat name → Export Chat → Without Media</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <strong>Upload Here</strong>
+                                    <p>Save the exported file and upload it above</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="section">
+                <div class="container">
+                    <div class="dashboard-header">
+                        <h2>Chat Analysis Dashboard</h2>
+                        <div class="chat-selector">
+                            <select id="chatSelector">
+                                <option value="">Select a chat to analyze</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-content" id="dashboardContent" style="display: none;">
+                        <!-- Overview Cards -->
+                        <div class="overview-cards">
+                            <div class="card">
+                                <h3>Total Messages</h3>
+                                <div class="metric" id="totalMessages">0</div>
+                            </div>
+                            <div class="card">
+                                <h3>Participants</h3>
+                                <div class="metric" id="totalParticipants">0</div>
+                            </div>
+                            <div class="card">
+                                <h3>Date Range</h3>
+                                <div class="metric" id="dateRange">-</div>
+                            </div>
+                            <div class="card">
+                                <h3>Avg Messages/Day</h3>
+                                <div class="metric" id="avgMessagesPerDay">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="charts-grid">
+                            <div class="chart-card">
+                                <h3>Messages Over Time</h3>
+                                <canvas id="messagesTimeChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Messages by Participant</h3>
+                                <canvas id="participantChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Activity Heatmap</h3>
+                                <canvas id="activityHeatmap"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Message Types</h3>
+                                <canvas id="messageTypesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Uploads Section -->
+            <section id="uploadsSection" class="section">
+                <div class="container">
+                    <h2>My Uploads</h2>
+                    <div class="uploads-list" id="uploadsList">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/fileUpload.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
