@@ -8,11 +8,16 @@ class WhatsAppParser:
     """Parser for WhatsApp chat export files"""
     
     def __init__(self):
-        # Regex patterns for different WhatsApp date formats (with square brackets)
+        # Regex patterns for different WhatsApp date formats
         self.date_patterns = [
+            # Format: DD/MM/YYYY, HH:MM - Participant: Message (your format)
+            r'(\d{1,2}/\d{1,2}/\d{4}),?\s*(\d{1,2}:\d{2})\s*-',
+            # Format: DD/MM/YY, HH:MM - Participant: Message  
+            r'(\d{1,2}/\d{1,2}/\d{2}),?\s*(\d{1,2}:\d{2})\s*-',
+            # Format with square brackets (alternative format)
             r'\[(\d{1,2}/\d{1,2}/\d{2,4}),?\s*(\d{1,2}:\d{2}:\d{2}?\s*(?:AM|PM)?)\]',
-            r'\[(\d{1,2}/\d{1,2}/\d{2,4}),?\s*(\d{1,2}:\d{2})\]',
-            r'\[(\d{4}-\d{2}-\d{2})\s*(\d{2}:\d{2}:\d{2})\]',
+            # Format with seconds
+            r'(\d{1,2}/\d{1,2}/\d{4}),?\s*(\d{1,2}:\d{2}:\d{2})\s*-',
         ]
         
         # System messages patterns
@@ -67,7 +72,7 @@ class WhatsAppParser:
                 date_str, time_str = match.groups()
                 timestamp_str = f"{date_str} {time_str}"
                 
-                # Extract message content after timestamp and closing bracket
+                # Extract message content after timestamp and dash
                 remaining = line[match.end():].strip()
                 
                 # Parse participant and message - WhatsApp format: "Participant Name: Message content"
@@ -76,13 +81,13 @@ class WhatsAppParser:
                     participant = remaining[:first_colon].strip()
                     message_content = remaining[first_colon + 1:].strip()
                     
+                    # Skip if it's a system message (no proper participant name)
+                    if any(sys_msg in message_content.lower() for sys_msg in self.system_messages):
+                        continue
+                    
                     # Parse timestamp
                     timestamp = self._parse_timestamp(timestamp_str)
                     if not timestamp:
-                        continue
-                    
-                    # Skip if it's a system message (no participant name)
-                    if any(sys_msg in message_content.lower() for sys_msg in self.system_messages):
                         continue
                     
                     # Determine message type
@@ -104,12 +109,17 @@ class WhatsAppParser:
     def _parse_timestamp(self, timestamp_str: str) -> datetime | None:
         """Parse timestamp string to datetime"""
         formats = [
+            # DD/MM/YYYY HH:MM (your format)
+            "%d/%m/%Y %H:%M",
+            "%d/%m/%Y, %H:%M",
+            # DD/MM/YY HH:MM
+            "%d/%m/%y %H:%M", 
+            "%d/%m/%y, %H:%M",
+            # MM/DD/YYYY formats (US format)
             "%m/%d/%Y, %I:%M:%S %p",
             "%m/%d/%Y, %I:%M %p",
             "%m/%d/%y, %I:%M:%S %p",
             "%m/%d/%y, %I:%M %p",
-            "%d/%m/%Y, %H:%M:%S",
-            "%d/%m/%Y, %H:%M",
             "%Y-%m-%d %H:%M:%S",
             # Formats without comma (common in WhatsApp exports)
             "%m/%d/%y %I:%M:%S %p",
