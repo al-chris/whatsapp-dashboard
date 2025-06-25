@@ -284,6 +284,110 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Enhanced Chart Cards */
+.chart-card.wide {
+    grid-column: span 2;
+}
+
+.chart-card.tall {
+    grid-row: span 2;
+}
+
+.chart-card .chart-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.chart-controls select,
+.chart-controls button {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.8rem;
+}
+
+.chart-controls button {
+    background: #25d366;
+    color: white;
+    border-color: #25d366;
+    cursor: pointer;
+}
+
+.chart-controls button:hover {
+    background: #128c7e;
+}
+
+/* User Statistics Grid */
+.user-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.user-stat-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.user-stat-card h4 {
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.user-stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #25d366;
+}
+
+.user-stat-subtext {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* Content Analysis Tabs */
+.content-tabs {
+    display: flex;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 1rem;
+}
+
+.content-tab {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.content-tab.active {
+    color: #25d366;
+    border-bottom-color: #25d366;
+}
+
+.content-tab:hover {
+    color: #25d366;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .charts-grid {
@@ -346,5 +450,40 @@
     
     .container {
         padding: 0 10px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .chart-card.wide {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .heatmap-hour,
+    .heatmap-cell {
+        min-width: 25px;
+    }
+    
+    .heatmap-hour {
+        font-size: 0.65rem;
+    }
+    
+    .heatmap-day {
+        width: 60px;
+        font-size: 0.7rem;
+    }
+    
+    .user-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .content-tab {
+        flex: 1;
+        min-width: 120px;
     }
 }

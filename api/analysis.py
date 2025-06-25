@@ -177,7 +177,7 @@ async def delete_chat(
     # Delete messages first (due to foreign key constraints)
     messages_query = select(Message).where(Message.chat_id == chat_id)
     messages_result = await session.execute(messages_query)
-    messages = messages_result.all()
+    messages = messages_result.scalars().all()
     
     for message in messages:
         await session.delete(message)
@@ -185,7 +185,7 @@ async def delete_chat(
     # Delete participants
     participants_query = select(Participant).where(Participant.chat_id == chat_id)
     participants_result = await session.execute(participants_query)
-    participants = participants_result.all()
+    participants = participants_result.scalars().all()
     
     for participant in participants:
         await session.delete(participant)
@@ -195,3 +195,76 @@ async def delete_chat(
     await session.commit()
     
     return {"message": f"Chat {chat_id} deleted successfully"}
+
+# Extended Analysis Endpoints
+
+@router.get("/activity-over-time/{chat_id}")
+async def get_activity_over_time(
+    chat_id: UUID,
+    period: str = "daily",
+    session: AsyncSession = Depends(get_session)
+) -> Dict[str, Any]:
+    """Get activity over time analysis"""
+    
+    chat = await session.get(Chat, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    analyzer = ChatAnalyzer(session)
+    return await analyzer.get_activity_over_time(chat_id, period)
+
+@router.get("/hourly-heatmap/{chat_id}")
+async def get_hourly_heatmap(
+    chat_id: UUID,
+    session: AsyncSession = Depends(get_session)
+) -> Dict[str, Any]:
+    """Get hourly activity heatmap"""
+    
+    chat = await session.get(Chat, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    analyzer = ChatAnalyzer(session)
+    return await analyzer.get_hourly_activity_heatmap(chat_id)
+
+@router.get("/user-statistics/{chat_id}")
+async def get_user_statistics(
+    chat_id: UUID,
+    session: AsyncSession = Depends(get_session)
+) -> Dict[str, Any]:
+    """Get comprehensive user statistics"""
+    
+    chat = await session.get(Chat, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    analyzer = ChatAnalyzer(session)
+    return await analyzer.get_user_statistics(chat_id)
+
+@router.get("/interaction-metrics/{chat_id}")
+async def get_interaction_metrics(
+    chat_id: UUID,
+    session: AsyncSession = Depends(get_session)
+) -> Dict[str, Any]:
+    """Get interaction metrics"""
+    
+    chat = await session.get(Chat, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    analyzer = ChatAnalyzer(session)
+    return await analyzer.get_interaction_metrics(chat_id)
+
+@router.get("/user-word-clouds/{chat_id}")
+async def get_user_word_clouds(
+    chat_id: UUID,
+    session: AsyncSession = Depends(get_session)
+) -> Dict[str, Any]:
+    """Get word clouds per user"""
+    
+    chat = await session.get(Chat, chat_id)
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    analyzer = ChatAnalyzer(session)
+    return await analyzer.get_user_word_clouds(chat_id)

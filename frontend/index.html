@@ -128,21 +128,94 @@
 
                         <!-- Charts -->
                         <div class="charts-grid">
-                            <div class="chart-card">
-                                <h3>Messages Over Time</h3>
+                            <!-- Activity Over Time Section -->
+                            <div class="chart-card wide">
+                                <h3>📊 Messages Over Time</h3>
+                                <div class="chart-controls">
+                                    <select id="timelineControls">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
                                 <canvas id="messagesTimeChart"></canvas>
                             </div>
+                            
+                            <!-- Hourly Activity Heatmap -->
+                            <div class="chart-card wide">
+                                <h3>🕒 Activity Heatmap</h3>
+                                <div id="activityHeatmap"></div>
+                            </div>
+                            
+                            <!-- Messages by Participant -->
                             <div class="chart-card">
-                                <h3>Messages by Participant</h3>
+                                <h3>👥 Messages by Participant</h3>
                                 <canvas id="participantChart"></canvas>
                             </div>
+                            
+                            <!-- Message Types -->
                             <div class="chart-card">
-                                <h3>Activity Heatmap</h3>
-                                <canvas id="activityHeatmap"></canvas>
-                            </div>
-                            <div class="chart-card">
-                                <h3>Message Types</h3>
+                                <h3>💬 Message Types</h3>
                                 <canvas id="messageTypesChart"></canvas>
+                            </div>
+                            
+                            <!-- User Statistics Section -->
+                            <div class="chart-card wide">
+                                <h3>📈 User Statistics</h3>
+                                <div class="content-tabs">
+                                    <button class="content-tab active" data-tab="messageLength">Message Length</button>
+                                    <button class="content-tab" data-tab="emojiUsage">Emoji Usage</button>
+                                    <button class="content-tab" data-tab="userWordClouds">Word Clouds</button>
+                                </div>
+                                <div class="tab-content active" id="messageLength">
+                                    <canvas id="userMessageLengthChart"></canvas>
+                                </div>
+                                <div class="tab-content" id="emojiUsage">
+                                    <canvas id="userEmojiUsageChart"></canvas>
+                                </div>
+                                <div class="tab-content" id="userWordClouds">
+                                    <div class="user-stats-grid" id="userWordCloudGrid">
+                                        <!-- Dynamic user word clouds -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Content Analysis Section -->
+                            <div class="chart-card wide">
+                                <h3>🔍 Content Analysis</h3>
+                                <div class="content-tabs">
+                                    <button class="content-tab active" data-tab="wordCloud">Word Cloud</button>
+                                    <button class="content-tab" data-tab="emojiAnalysis">Emoji Analysis</button>
+                                    <button class="content-tab" data-tab="sharedLinks">Shared Links</button>
+                                </div>
+                                <div class="tab-content active" id="wordCloud">
+                                    <canvas id="wordCloudChart"></canvas>
+                                </div>
+                                <div class="tab-content" id="emojiAnalysis">
+                                    <canvas id="emojiChart"></canvas>
+                                </div>
+                                <div class="tab-content" id="sharedLinks">
+                                    <canvas id="sharedDomainsChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Interaction Metrics Section -->
+                            <div class="chart-card">
+                                <h3>⚡ Response Times</h3>
+                                <canvas id="responseTimeChart"></canvas>
+                            </div>
+                            
+                            <div class="chart-card">
+                                <h3>🗣️ Conversation Starters</h3>
+                                <canvas id="conversationStartersChart"></canvas>
+                            </div>
+                            
+                            <!-- Longest Pauses -->
+                            <div class="chart-card wide">
+                                <h3>⏸️ Longest Conversation Pauses</h3>
+                                <div id="longestPauses">
+                                    <!-- Dynamic content -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -164,8 +237,8 @@
     <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/fileUpload.js"></script>
-    <script src="js/dashboard.js"></script>
     <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

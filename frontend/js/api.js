@@ -83,12 +83,36 @@ class API {
         return this.request(`/analysis/${chatId}`);
     }
 
+    async getChatAnalysis(chatId) {
+        return this.request(`/analysis/${chatId}`);
+    }
+
     async getStats(chatId) {
         return this.request(`/stats/${chatId}`);
     }
 
     async deleteChat(chatId) {
         return this.request(`/chat/${chatId}`, { method: 'DELETE' });
+    }
+
+    async getActivityOverTime(chatId, period = 'daily') {
+        return this.request(`/activity-over-time/${chatId}?period=${period}`);
+    }
+
+    async getHourlyHeatmap(chatId) {
+        return this.request(`/hourly-heatmap/${chatId}`);
+    }
+
+    async getUserStatistics(chatId) {
+        return this.request(`/user-statistics/${chatId}`);
+    }
+
+    async getInteractionMetrics(chatId) {
+        return this.request(`/interaction-metrics/${chatId}`);
+    }
+
+    async getUserWordClouds(chatId) {
+        return this.request(`/user-word-clouds/${chatId}`);
     }
 }
 

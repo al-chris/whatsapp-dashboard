@@ -24,8 +24,8 @@ class WhatsAppDashboardApp {
         const chatSelector = document.getElementById('chatSelector');
         if (chatSelector) {
             chatSelector.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    this.loadDashboard(e.target.value);
+                if (e.target.value && window.dashboardManager) {
+                    window.dashboardManager.loadChatAnalysis(e.target.value);
                 }
             });
         }
@@ -35,7 +35,9 @@ class WhatsAppDashboardApp {
             if (e.target.id === 'viewDashboardBtn') {
                 if (this.currentChatId) {
                     this.showSection('dashboard');
-                    this.loadDashboard(this.currentChatId);
+                    if (window.dashboardManager) {
+                        window.dashboardManager.loadChatAnalysis(this.currentChatId);
+                    }
                 }
             }
         });
@@ -136,151 +138,11 @@ class WhatsAppDashboardApp {
         }
     }
     
-    async loadDashboard(chatId) {
-        this.currentChatId = chatId;
-        const dashboardContent = document.getElementById('dashboardContent');
-        const chatSelector = document.getElementById('chatSelector');
-        
-        // Set selected chat
-        if (chatSelector) {
-            chatSelector.value = chatId;
-        }
-        
-        try {
-            // Show loading
-            dashboardContent.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading analysis...</p></div>';
-            dashboardContent.style.display = 'block';
-            
-            // Load analysis data
-            const analysis = await window.api.getAnalysis(chatId);
-            
-            // Create dashboard content first
-            dashboardContent.innerHTML = `
-                <!-- Overview Cards -->
-                <div class="overview-cards">
-                    <div class="card">
-                        <h3>Total Messages</h3>
-                        <div class="metric" id="totalMessages">0</div>
-                    </div>
-                    <div class="card">
-                        <h3>Participants</h3>
-                        <div class="metric" id="totalParticipants">0</div>
-                    </div>
-                    <div class="card">
-                        <h3>Date Range</h3>
-                        <div class="metric" id="dateRange">-</div>
-                    </div>
-                    <div class="card">
-                        <h3>Avg Messages/Day</h3>
-                        <div class="metric" id="avgMessagesPerDay">0</div>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3>Messages Over Time</h3>
-                        <canvas id="messagesTimeChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Messages by Participant</h3>
-                        <canvas id="participantChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Activity Heatmap</h3>
-                        <div id="activityHeatmap" style="height: 300px;"></div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Message Types</h3>
-                        <canvas id="messageTypesChart"></canvas>
-                    </div>
-                </div>
-            `;
-            
-            // Now update overview cards after the DOM elements exist
-            this.updateOverviewCards(analysis);
-            
-            // Load charts
-            await this.loadCharts(chatId);
-            
-        } catch (error) {
-            console.error('Error loading dashboard:', error);
-            dashboardContent.innerHTML = `
-                <div class="card" style="text-align: center; padding: 2rem; border: 2px solid #dc3545;">
-                    <h3 style="color: #dc3545;">Error Loading Analysis</h3>
-                    <p>${this.escapeHtml(error.message)}</p>
-                    <button class="btn-primary" onclick="app.loadDashboard('${chatId}')">Retry</button>
-                </div>
-            `;
-        }
-    }
-    
-    updateOverviewCards(analysis) {
-        const { chat_info, analysis: data } = analysis;
-        
-        // Update metrics with safety checks
-        const totalMessagesEl = document.getElementById('totalMessages');
-        if (totalMessagesEl) {
-            totalMessagesEl.textContent = chat_info.message_count.toLocaleString();
-        }
-        
-        const totalParticipantsEl = document.getElementById('totalParticipants');
-        if (totalParticipantsEl) {
-            totalParticipantsEl.textContent = chat_info.participant_count;
-        }
-        
-        // Date range
-        const startDate = chat_info.date_range.start ? 
-            new Date(chat_info.date_range.start).toLocaleDateString() : 'Unknown';
-        const endDate = chat_info.date_range.end ? 
-            new Date(chat_info.date_range.end).toLocaleDateString() : 'Unknown';
-        
-        const dateRangeEl = document.getElementById('dateRange');
-        if (dateRangeEl) {
-            dateRangeEl.textContent = `${startDate} - ${endDate}`;
-        }
-        
-        // Average messages per day
-        const avgMessagesPerDayEl = document.getElementById('avgMessagesPerDay');
-        if (avgMessagesPerDayEl) {
-            avgMessagesPerDayEl.textContent = data.basic_stats.avg_messages_per_day;
-        }
-    }
-    
-    async loadCharts(chatId) {
-        try {
-            // Destroy existing charts
-            Object.values(this.charts).forEach(chart => {
-                if (chart && typeof chart.destroy === 'function') {
-                    chart.destroy();
-                }
-            });
-            this.charts = {};
-            
-            // Load chart data
-            const [timelineData, participantData, activityData, messageTypesData] = await Promise.all([
-                window.api.request(`/export/${chatId}/chart-data?chart_type=timeline`),
-                window.api.request(`/export/${chatId}/chart-data?chart_type=participants`),
-                window.api.request(`/activity-heatmap/${chatId}`),
-                window.api.request(`/export/${chatId}/chart-data?chart_type=message-types`)
-            ]);
-            
-            // Create charts
-            this.charts.timeline = window.chartManager.createTimelineChart('messagesTimeChart', timelineData.data);
-            this.charts.participants = window.chartManager.createParticipantsChart('participantChart', participantData.data);
-            this.charts.messageTypes = window.chartManager.createMessageTypesChart('messageTypesChart', messageTypesData.data);
-            
-            // Create activity heatmap
-            window.chartManager.createActivityHeatmap('activityHeatmap', activityData.heatmap);
-            
-        } catch (error) {
-            console.error('Error loading charts:', error);
-        }
-    }
-    
     viewAnalysis(chatId) {
         this.showSection('dashboard');
-        this.loadDashboard(chatId);
+        if (window.dashboardManager) {
+            window.dashboardManager.loadChatAnalysis(chatId);
+        }
     }
     
     async exportData(chatId) {
