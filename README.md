@@ -62,7 +62,7 @@ python main.py
 
 4. **Open your browser**
 ```
-http://localhost:8000
+http://localhost:80
 ```
 
 ## How to Use
@@ -172,7 +172,7 @@ app.add_middleware(
 python main.py
 
 # Or with uvicorn directly
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 80
 ```
 
 ### Testing
@@ -181,7 +181,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 pytest
 
 # Manual API testing
-curl -X GET "http://localhost:8000/health"
+curl -X GET "http://localhost:80/health"
 ```
 
 ## Deployment

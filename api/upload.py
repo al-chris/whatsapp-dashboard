@@ -67,7 +67,7 @@ async def list_uploads(session: AsyncSession = Depends(get_session)):
     """List all uploaded chats"""
     from sqlmodel import select
     
-    result = await session.exec(select(Chat))
+    result = await session.execute(select(Chat))
     chats = result.all()
     
     return [
