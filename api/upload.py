@@ -68,7 +68,7 @@ async def list_uploads(session: AsyncSession = Depends(get_session)):
     from sqlmodel import select
     
     result = await session.execute(select(Chat))
-    chats = result.all()
+    chats = result.scalars().all()
     
     return [
         {

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, func, and_
+from sqlmodel import select, func, and_, Integer
 from models.chat import Chat
 from models.message import Message, MessageType
 from models.participant import Participant
@@ -56,12 +56,12 @@ class ChatAnalyzer:
         # Get total message count
         total_messages_query = select(func.count(Message.id)).where(Message.chat_id == chat_id)
         total_messages_result = await self.session.execute(total_messages_query)
-        total_messages = total_messages_result.one()
+        total_messages = total_messages_result.scalar_one()
         
         # Get participant count
         participant_count_query = select(func.count(Participant.id)).where(Participant.chat_id == chat_id)
         participant_count_result = await self.session.execute(participant_count_query)
-        participant_count = participant_count_result.one()
+        participant_count = participant_count_result.scalar_one()
         
         # Get date range
         date_range_query = select(
@@ -86,7 +86,7 @@ class ChatAnalyzer:
         ).where(Message.chat_id == chat_id).group_by(Message.message_type)
         
         message_types_result = await self.session.execute(message_types_query)
-        message_type_counts = dict(message_types_result.scalars().all())
+        message_type_counts = {row[0]: row[1] for row in message_types_result.all()}
         
         return {
             "total_messages": total_messages,
@@ -111,8 +111,8 @@ class ChatAnalyzer:
             func.avg(Message.char_count).label("avg_message_length"),
             func.sum(Message.char_count).label("total_chars"),
             func.sum(Message.word_count).label("total_words"),
-            func.sum(func.cast(Message.has_emoji, int)).label("emoji_count"),
-            func.sum(func.cast(Message.has_link, int)).label("link_count"),
+            func.sum(func.cast(Message.has_emoji, Integer)).label("emoji_count"),
+            func.sum(func.cast(Message.has_link, Integer)).label("link_count"),
             func.min(Message.timestamp).label("first_message"),
             func.max(Message.timestamp).label("last_message")
         ).select_from(
@@ -122,7 +122,7 @@ class ChatAnalyzer:
         ).group_by(Participant.id, Participant.name)
         
         participant_stats_result = await self.session.execute(participant_stats_query)
-        participant_stats = participant_stats_result.scalars().all()
+        participant_stats = participant_stats_result.mappings().all()
         
         results = []
         for stats in participant_stats:
@@ -172,14 +172,14 @@ class ChatAnalyzer:
         ).group_by(time_group).order_by(time_group)
         
         timeline_result = await self.session.execute(timeline_query)
-        timeline_data = timeline_result.scalars().all()
+        timeline_data = timeline_result.all()
         
         return [
             {
-                "period": period,
-                "message_count": count
+                "period": row[0],
+                "message_count": row[1]
             }
-            for period, count in timeline_data
+            for row in timeline_data
         ]
     
     async def get_word_frequency(self, chat_id: UUID, limit: int = 100) -> List[Dict[str, Any]]:
@@ -239,15 +239,15 @@ class ChatAnalyzer:
         )
         
         heatmap_result = await self.session.execute(messages_query)
-        heatmap_data = heatmap_result.scalars().all()
+        heatmap_data = heatmap_result.all()
         
         # Create 2D array for heatmap (7 days x 24 hours)
         heatmap_matrix = [[0 for _ in range(24)] for _ in range(7)]
         
-        for day_of_week, hour, count in heatmap_data:
-            day_idx = int(day_of_week)
-            hour_idx = int(hour)
-            heatmap_matrix[day_idx][hour_idx] = count
+        for row in heatmap_data:
+            day_idx = int(row[0])
+            hour_idx = int(row[1])
+            heatmap_matrix[day_idx][hour_idx] = row[2]
         
         return {
             "matrix": heatmap_matrix,
@@ -267,7 +267,7 @@ class ChatAnalyzer:
         ).group_by(func.strftime('%H', Message.timestamp))
         
         hourly_result = await self.session.execute(hourly_query)
-        hourly_data = dict(hourly_result.scalars().all())
+        hourly_data = {row[0]: row[1] for row in hourly_result.all()}
         
         # Get daily distribution
         daily_query = select(
@@ -278,7 +278,7 @@ class ChatAnalyzer:
         ).group_by(func.strftime('%w', Message.timestamp))
         
         daily_result = await self.session.execute(daily_query)
-        daily_data = dict(daily_result.scalars().all())
+        daily_data = {row[0]: row[1] for row in daily_result.all()}
         
         # Find peak activity periods
         peak_hour = max(hourly_data.items(), key=lambda x: x[1])[0] if hourly_data else "00"
@@ -324,7 +324,7 @@ class ChatAnalyzer:
         ).group_by(Participant.name)
         
         starters_result = await self.session.execute(conversation_starters_query)
-        conversation_starters = dict(starters_result.scalars().all())
+        conversation_starters = {row[0]: row[1] for row in starters_result.all()}
         
         return {
             "most_active_hour": activity_patterns["peak_hour"],
@@ -337,19 +337,24 @@ class ChatAnalyzer:
     async def get_content_analysis(self, chat_id: UUID) -> Dict[str, Any]:
         """Get content analysis including emojis, links, etc."""
         
+        # Get total message count for frequency calculations
+        total_messages_query = select(func.count(Message.id)).where(Message.chat_id == chat_id)
+        total_messages_result = await self.session.execute(total_messages_query)
+        total_messages = total_messages_result.scalar_one()
+        
         # Get emoji usage
         emoji_count_query = select(
-            func.sum(func.cast(Message.has_emoji, int))
+            func.sum(func.cast(Message.has_emoji, Integer))
         ).where(Message.chat_id == chat_id)
         emoji_result = await self.session.execute(emoji_count_query)
-        total_emojis = emoji_result.one() or 0
+        total_emojis = emoji_result.scalar() or 0
         
         # Get link sharing
         link_count_query = select(
-            func.sum(func.cast(Message.has_link, int))
+            func.sum(func.cast(Message.has_link, Integer))
         ).where(Message.chat_id == chat_id)
         link_result = await self.session.execute(link_count_query)
-        total_links = link_result.one() or 0
+        total_links = link_result.scalar() or 0
         
         # Get word frequency (top 20)
         word_frequency = await self.get_word_frequency(chat_id, 20)
@@ -372,11 +377,11 @@ class ChatAnalyzer:
         return {
             "emoji_usage": {
                 "total_messages_with_emojis": total_emojis,
-                "emoji_frequency": total_emojis / max(1, sum(1 for _ in await self._get_all_messages(chat_id)))
+                "emoji_frequency": total_emojis / max(1, total_messages) if total_messages > 0 else 0
             },
             "link_sharing": {
                 "total_messages_with_links": total_links,
-                "link_frequency": total_links / max(1, sum(1 for _ in await self._get_all_messages(chat_id)))
+                "link_frequency": total_links / max(1, total_messages) if total_messages > 0 else 0
             },
             "word_frequency": word_frequency,
             "message_length": {

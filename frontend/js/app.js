@@ -154,10 +154,7 @@ class WhatsAppDashboardApp {
             // Load analysis data
             const analysis = await window.api.getAnalysis(chatId);
             
-            // Update overview cards
-            this.updateOverviewCards(analysis);
-            
-            // Restore dashboard content
+            // Create dashboard content first
             dashboardContent.innerHTML = `
                 <!-- Overview Cards -->
                 <div class="overview-cards">
@@ -200,7 +197,7 @@ class WhatsAppDashboardApp {
                 </div>
             `;
             
-            // Update overview cards again
+            // Now update overview cards after the DOM elements exist
             this.updateOverviewCards(analysis);
             
             // Load charts
@@ -221,22 +218,33 @@ class WhatsAppDashboardApp {
     updateOverviewCards(analysis) {
         const { chat_info, analysis: data } = analysis;
         
-        // Update metrics
-        document.getElementById('totalMessages').textContent = 
-            chat_info.message_count.toLocaleString();
-        document.getElementById('totalParticipants').textContent = 
-            chat_info.participant_count;
+        // Update metrics with safety checks
+        const totalMessagesEl = document.getElementById('totalMessages');
+        if (totalMessagesEl) {
+            totalMessagesEl.textContent = chat_info.message_count.toLocaleString();
+        }
+        
+        const totalParticipantsEl = document.getElementById('totalParticipants');
+        if (totalParticipantsEl) {
+            totalParticipantsEl.textContent = chat_info.participant_count;
+        }
         
         // Date range
         const startDate = chat_info.date_range.start ? 
             new Date(chat_info.date_range.start).toLocaleDateString() : 'Unknown';
         const endDate = chat_info.date_range.end ? 
             new Date(chat_info.date_range.end).toLocaleDateString() : 'Unknown';
-        document.getElementById('dateRange').textContent = `${startDate} - ${endDate}`;
+        
+        const dateRangeEl = document.getElementById('dateRange');
+        if (dateRangeEl) {
+            dateRangeEl.textContent = `${startDate} - ${endDate}`;
+        }
         
         // Average messages per day
-        document.getElementById('avgMessagesPerDay').textContent = 
-            data.basic_stats.avg_messages_per_day;
+        const avgMessagesPerDayEl = document.getElementById('avgMessagesPerDay');
+        if (avgMessagesPerDayEl) {
+            avgMessagesPerDayEl.textContent = data.basic_stats.avg_messages_per_day;
+        }
     }
     
     async loadCharts(chatId) {
