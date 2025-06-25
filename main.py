@@ -2,6 +2,9 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+load_dotenv()
 import uvicorn
 from database import init_db
 
