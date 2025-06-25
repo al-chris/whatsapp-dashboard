@@ -1,5 +1,7 @@
 # WhatsApp Chat Analysis Dashboard
 
+![LOGO](logo.png)
+
 A comprehensive web application for analyzing and visualizing WhatsApp chat exports built with FastAPI and vanilla JavaScript.
 
 ## Features
