@@ -8,7 +8,7 @@ from collections.abc import AsyncGenerator
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./whatsapp_dashboard.db")
 
 # Create async engine
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=False)
 
 # Create async session maker
 AsyncSessionLocal = async_sessionmaker(
